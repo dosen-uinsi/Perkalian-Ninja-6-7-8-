@@ -2,14 +2,14 @@
 <html lang="id" class="h-full">
  <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Ninja Perkalian - By Mathnology</title>
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
   <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
   <script src="/_sdk/element_sdk.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&amp;display=swap" rel="stylesheet">
   <style>
-    * { font-family: 'Nunito', sans-serif; }
+    * { font-family: 'Nunito', sans-serif; touch-action: manipulation; }
 
     @keyframes popIn {
       0% { transform: scale(0.5); opacity: 0; }
@@ -18,43 +18,39 @@
     }
     @keyframes shake {
       0%, 100% { transform: translateX(0); }
-      20% { transform: translateX(-8px); }
-      40% { transform: translateX(8px); }
-      60% { transform: translateX(-6px); }
-      80% { transform: translateX(6px); }
+      20% { transform: translateX(-6px); }
+      40% { transform: translateX(6px); }
+      60% { transform: translateX(-4px); }
+      80% { transform: translateX(4px); }
     }
     @keyframes bounceIn {
       0% { transform: scale(0); }
       50% { transform: scale(1.2); }
       100% { transform: scale(1); }
     }
-    @keyframes blood-splatter-ninja {
-      0% { transform: translate(-50%, -50%) scale(0); opacity: 1; }
-      100% { transform: translate(calc(-50% + 40px), calc(-50% + 40px)) scale(1.5); opacity: 0; }
-    }
-    @keyframes blood-splatter-enemy {
-      0% { transform: translate(-50%, -50%) scale(0); opacity: 1; }
-      100% { transform: translate(calc(-50% - 40px), calc(-50% + 40px)) scale(1.5); opacity: 0; }
-    }
     @keyframes float {
       0%, 100% { transform: translateY(0px); }
-      50% { transform: translateY(-10px); }
+      50% { transform: translateY(-8px); }
     }
     
     .pop-in { animation: popIn 0.4s ease-out forwards; }
-    .shake { animation: shake 0.5s ease-in-out; }
+    .shake { animation: shake 0.4s ease-in-out; }
     .bounce-in { animation: bounceIn 0.5s ease-out forwards; }
     .float { animation: float 3s ease-in-out infinite; }
 
     .match-card {
-      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
       cursor: pointer;
       user-select: none;
       position: relative;
       z-index: 60; 
+      -webkit-tap-highlight-color: transparent;
+    }
+    .match-card:active:not(.matched):not(.disabled) {
+      transform: scale(0.95);
     }
     .match-card:hover:not(.matched):not(.selected):not(.disabled) {
-      transform: translateY(-4px) scale(1.03);
+      transform: translateY(-2px) scale(1.02);
     }
     .match-card.selected {
       transform: scale(1.05);
@@ -71,12 +67,16 @@
 
     .confetti-piece {
       position: fixed;
-      width: 10px;
-      height: 10px;
+      width: 8px;
+      height: 8px;
       border-radius: 2px;
       animation: confetti-fall 2.5s ease-in forwards;
       pointer-events: none;
       z-index: 100;
+    }
+    @keyframes confetti-fall {
+      0% { transform: translateY(-10px) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
     }
     
     .line-connector {
@@ -94,10 +94,10 @@
       transition: d 0.2s ease-out;
     }
 
-    /* Battle Arena Styles */
     .char-sprite {
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       display: inline-block;
+      will-change: transform;
     }
     
     #battle-effect {
@@ -106,134 +106,136 @@
     }
     
     .ninja-hurt {
-        filter: drop-shadow(0 0 20px rgba(244, 63, 94, 0.8)) brightness(1.3) saturate(3);
+        filter: drop-shadow(0 0 15px rgba(244, 63, 94, 0.8)) brightness(1.3) saturate(3);
     }
-    
     .enemy-hurt {
-        filter: drop-shadow(0 0 20px rgba(16, 185, 129, 0.8)) brightness(1.3) saturate(3);
+        filter: drop-shadow(0 0 15px rgba(16, 185, 129, 0.8)) brightness(1.3) saturate(3);
     }
 
-    /* Menu Buttons Hover */
     .menu-btn {
-        transition: all 0.3s ease;
+        transition: all 0.2s ease;
+        -webkit-tap-highlight-color: transparent;
     }
-    .menu-btn:hover {
-        transform: translateY(-5px) scale(1.02);
-        box-shadow: 0 10px 25px -5px rgba(0,0,0,0.5);
+    .menu-btn:active {
+        transform: scale(0.95);
     }
 
-    /* Music Toggle Button */
     #music-toggle {
         transition: all 0.2s;
-    }
-    #music-toggle:hover {
-        transform: scale(1.1);
+        -webkit-tap-highlight-color: transparent;
     }
   </style>
-  <style>body { box-sizing: border-box; }</style>
+  <style>body { box-sizing: border-box; overscroll-behavior-y: none; }</style>
   <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
  </head>
  <body class="h-full text-slate-200">
-  <div id="app-wrapper" class="h-full w-full overflow-auto relative" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);">
+  <div id="app-wrapper" class="h-full w-full overflow-x-hidden overflow-y-auto relative" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);">
    
-   <audio id="bg-music" loop>
+   <audio id="bg-music" loop preload="auto">
        <source src="https://assets.mixkit.co/music/preview/mixkit-arcade-retro-background-219.mp3" type="audio/mpeg">
    </audio>
+   <audio id="sfx-select" preload="auto">
+       <source src="https://assets.mixkit.co/sfx/preview/mixkit-arcade-retro-changing-tab-206.mp3" type="audio/mpeg">
+   </audio>
+   <audio id="sfx-ninja" preload="auto">
+       <source src="https://assets.mixkit.co/sfx/preview/mixkit-sword-strikes-armor-2765.mp3" type="audio/mpeg">
+   </audio>
+   <audio id="sfx-enemy" preload="auto">
+       <source src="https://assets.mixkit.co/sfx/preview/mixkit-fire-explosion-1343.mp3" type="audio/mpeg">
+   </audio>
 
-   <button id="music-toggle" onclick="toggleMusic(event)" class="fixed top-4 right-4 z-50 bg-slate-800/80 border-2 border-slate-600 rounded-full w-12 h-12 flex items-center justify-center text-2xl shadow-lg backdrop-blur-sm" title="Matikan/Nyalakan Suara">
+   <button id="music-toggle" onclick="toggleMusic(event)" class="fixed top-3 right-3 md:top-4 md:right-4 z-50 bg-slate-800/90 border border-slate-600 rounded-full w-10 h-10 md:w-12 md:h-12 flex items-center justify-center text-xl md:text-2xl shadow-lg backdrop-blur-md" title="Matikan/Nyalakan Suara">
        🔇
    </button>
 
-   <div style="position:fixed;top:-40px;right:-40px;width:200px;height:200px;border-radius:50%;background:rgba(249, 115, 22, 0.05);pointer-events:none;z-index:0;"></div>
-   <div style="position:fixed;bottom:-60px;left:-60px;width:250px;height:250px;border-radius:50%;background:rgba(56, 189, 248, 0.05);pointer-events:none;z-index:0;"></div>
+   <div style="position:fixed;top:-20px;right:-20px;width:150px;height:150px;border-radius:50%;background:rgba(249, 115, 22, 0.05);pointer-events:none;z-index:0;"></div>
+   <div style="position:fixed;bottom:-30px;left:-30px;width:180px;height:180px;border-radius:50%;background:rgba(56, 189, 248, 0.05);pointer-events:none;z-index:0;"></div>
 
-   <div id="home-view" class="max-w-3xl mx-auto px-4 py-12 relative z-10 flex flex-col items-center justify-center min-h-full">
+   <div id="home-view" class="max-w-3xl mx-auto px-4 py-8 relative z-10 flex flex-col items-center justify-center min-h-full">
        
-       <div class="text-center mb-10 float">
-           <div class="text-7xl mb-4">🥷✨</div>
-           <h1 class="text-5xl md:text-6xl font-black tracking-tight mb-1" style="color: #f8fafc;">Ninja <span style="color: #f97316;">Perkalian</span></h1>
-           <h2 class="text-sm md:text-base font-extrabold uppercase mb-4" style="color: #38bdf8; letter-spacing: 0.25em;">By Mathnology</h2>
-           <p class="text-xl font-semibold" style="color: #94a3b8;">Bantu Ninja mengalahkan monster dengan kekuatan Matematika!</p>
+       <div class="text-center mb-8 float">
+           <div class="text-6xl md:text-7xl mb-3">🥷✨</div>
+           <h1 class="text-4xl md:text-6xl font-black tracking-tight mb-1" style="color: #f8fafc;">Ninja <span style="color: #f97316;">Perkalian</span></h1>
+           <h2 class="text-xs md:text-sm font-extrabold uppercase mb-3 md:mb-4" style="color: #38bdf8; letter-spacing: 0.25em;">By Mathnology</h2>
+           <p class="text-base md:text-xl font-semibold px-2" style="color: #94a3b8;">Bantu Ninja mengalahkan monster dengan Matematika!</p>
        </div>
 
-       <div class="w-full max-w-md flex flex-col gap-5">
-           <button onclick="startGame('6')" class="menu-btn relative overflow-hidden rounded-3xl p-6 text-left flex items-center justify-between group" style="background: linear-gradient(135deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.9)); border: 2px solid rgba(56, 189, 248, 0.4);">
+       <div class="w-full max-w-sm md:max-w-md flex flex-col gap-4 md:gap-5">
+           <button onclick="startGame('6')" class="menu-btn relative overflow-hidden rounded-3xl p-5 md:p-6 text-left flex items-center justify-between group" style="background: linear-gradient(135deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.9)); border: 2px solid rgba(56, 189, 248, 0.4);">
                <div class="flex flex-col">
-                   <span class="text-2xl font-black mb-1" style="color: #38bdf8;">Perkalian 6</span>
-                   <span class="text-sm font-semibold" style="color: #94a3b8;">Lawan: Naga 🐉</span>
+                   <span class="text-xl md:text-2xl font-black mb-1" style="color: #38bdf8;">Perkalian 6</span>
+                   <span class="text-xs md:text-sm font-semibold" style="color: #94a3b8;">Lawan: Naga 🐉</span>
                </div>
-               <div class="text-5xl transform transition-transform group-hover:scale-110">🐉</div>
+               <div class="text-4xl md:text-5xl transform transition-transform group-hover:scale-110">🐉</div>
            </button>
 
-           <button onclick="startGame('78')" class="menu-btn relative overflow-hidden rounded-3xl p-6 text-left flex items-center justify-between group" style="background: linear-gradient(135deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.9)); border: 2px solid rgba(244, 63, 94, 0.4);">
+           <button onclick="startGame('78')" class="menu-btn relative overflow-hidden rounded-3xl p-5 md:p-6 text-left flex items-center justify-between group" style="background: linear-gradient(135deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.9)); border: 2px solid rgba(244, 63, 94, 0.4);">
                <div class="flex flex-col">
-                   <span class="text-2xl font-black mb-1" style="color: #f43f5e;">Perkalian 7 & 8</span>
-                   <span class="text-sm font-semibold" style="color: #94a3b8;">Lawan: Raksasa 👹</span>
+                   <span class="text-xl md:text-2xl font-black mb-1" style="color: #f43f5e;">Perkalian 7 & 8</span>
+                   <span class="text-xs md:text-sm font-semibold" style="color: #94a3b8;">Lawan: Raksasa 👹</span>
                </div>
-               <div class="text-5xl transform transition-transform group-hover:scale-110">👹</div>
+               <div class="text-4xl md:text-5xl transform transition-transform group-hover:scale-110">👹</div>
            </button>
        </div>
    </div>
 
-   <div id="game-view" class="max-w-3xl mx-auto px-4 py-6 relative z-10 hidden">
+   <div id="game-view" class="max-w-3xl mx-auto px-3 py-6 md:py-8 relative z-10 hidden">
     
-    <header class="text-center mb-6">
-     <h1 class="text-3xl md:text-4xl font-black tracking-tight mb-1" style="color: #f8fafc;">Ninja <span style="color: #f97316;">Perkalian</span></h1>
-     <h2 class="text-xs md:text-sm font-extrabold uppercase mb-3" style="color: #38bdf8; letter-spacing: 0.25em;">By Mathnology</h2>
-     <p id="game-instruction-text" class="text-base font-semibold" style="color: #94a3b8;">Jawab benar 3 kali untuk menang!</p>
+    <header class="text-center mb-5 md:mb-6">
+     <h1 class="text-2xl md:text-4xl font-black tracking-tight mb-1" style="color: #f8fafc;">Ninja <span style="color: #f97316;">Perkalian</span></h1>
+     <h2 class="text-[10px] md:text-sm font-extrabold uppercase mb-2" style="color: #38bdf8; letter-spacing: 0.25em;">By Mathnology</h2>
+     <p id="game-instruction-text" class="text-sm md:text-base font-semibold leading-tight" style="color: #94a3b8;">Jawab benar 3 kali untuk menang!</p>
     </header>
 
-    <div class="relative border-2 rounded-3xl p-6 mb-6 shadow-2xl" style="background-color: rgba(15, 23, 42, 0.6); border-color: rgba(51, 65, 85, 0.8);">
+    <div class="relative border-2 rounded-2xl md:rounded-3xl p-4 md:p-6 mb-5 shadow-2xl" style="background-color: rgba(15, 23, 42, 0.6); border-color: rgba(51, 65, 85, 0.8);">
         
-        <div class="flex justify-between items-center mb-5 pb-4 border-b border-slate-700/60">
-            <div class="flex flex-col items-start gap-1">
-                <span class="font-bold text-xs uppercase tracking-wider text-slate-400">Ninja HP</span>
-                <div id="ninja-hp-hearts" class="text-2xl flex gap-1" style="color: #f43f5e;">❤️</div>
+        <div class="flex justify-between items-center mb-3 pb-3 border-b border-slate-700/60">
+            <div class="flex flex-col items-start gap-0.5">
+                <span class="font-bold text-[10px] md:text-xs uppercase tracking-wider text-slate-400">Ninja HP</span>
+                <div id="ninja-hp-hearts" class="text-lg md:text-2xl flex gap-1" style="color: #f43f5e;">❤️</div>
             </div>
             
-            <div class="font-black text-xl text-slate-500">VS</div>
+            <div class="font-black text-sm md:text-xl text-slate-500">VS</div>
             
-            <div class="flex flex-col items-end gap-1">
-                <span id="enemy-hp-label" class="font-bold text-xs uppercase tracking-wider text-slate-400">Musuh HP</span>
-                <div id="enemy-hp-hearts" class="text-2xl flex gap-1" style="color: #10b981;">💚💚💚</div>
+            <div class="flex flex-col items-end gap-0.5">
+                <span id="enemy-hp-label" class="font-bold text-[10px] md:text-xs uppercase tracking-wider text-slate-400">Musuh HP</span>
+                <div id="enemy-hp-hearts" class="text-lg md:text-2xl flex gap-1" style="color: #10b981;">💚💚💚</div>
             </div>
         </div>
 
-        <div class="flex justify-between items-center relative py-6 px-4 overflow-hidden rounded-2xl" style="background-color: rgba(0, 0, 0, 0.2);">
-            <div id="ninja-char" class="char-sprite text-7xl md:text-8xl z-10 drop-shadow-xl" style="transform: scaleX(-1);">🥷</div>
+        <div class="flex justify-between items-center relative py-5 px-2 md:px-4 overflow-hidden rounded-xl md:rounded-2xl" style="background-color: rgba(0, 0, 0, 0.2);">
+            <div id="ninja-char" class="char-sprite text-5xl md:text-7xl z-10 drop-shadow-xl" style="transform: scaleX(-1);">🥷</div>
             
-            <div id="battle-effect" class="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 text-6xl md:text-7xl opacity-0 z-20">💥</div>
+            <div id="battle-effect" class="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 text-5xl md:text-7xl opacity-0 z-20">💥</div>
             
-            <div id="blood-effect" class="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 text-7xl opacity-0 z-20">🩸</div>
-            
-            <div id="enemy-char" class="char-sprite text-7xl md:text-8xl z-10 drop-shadow-xl">🐉</div>
+            <div id="enemy-char" class="char-sprite text-5xl md:text-7xl z-10 drop-shadow-xl">🐉</div>
         </div>
     </div>
     
-    <div class="flex items-center justify-between mb-5 px-2 gap-3">
-     <button onclick="goHome()" class="flex items-center justify-center p-3 rounded-2xl transition-all hover:scale-105 shadow-sm" style="background: rgba(248, 113, 113, 0.1); border: 1px solid rgba(248, 113, 113, 0.3); color: #f87171;" title="Kembali ke Menu">
-         <i data-lucide="home" style="width: 20px; height: 20px;"></i>
+    <div class="flex items-center justify-between mb-5 gap-2 md:gap-3">
+     <button onclick="goHome()" class="flex items-center justify-center p-2.5 md:p-3 rounded-xl md:rounded-2xl transition-all shadow-sm active:scale-95" style="background: rgba(248, 113, 113, 0.1); border: 1px solid rgba(248, 113, 113, 0.3); color: #f87171;" title="Kembali ke Menu">
+         <i data-lucide="home" class="w-5 h-5 md:w-6 md:h-6"></i>
      </button>
      
-     <div id="status-msg" class="font-bold text-base px-4 py-3 rounded-2xl text-center flex-1 shadow-sm truncate" style="color: #cbd5e1; background: rgba(30, 41, 59, 0.8); border: 1px solid rgba(51, 65, 85, 0.8);">
+     <div id="status-msg" class="font-bold text-xs md:text-base px-2 py-3 rounded-xl md:rounded-2xl text-center flex-1 shadow-sm truncate" style="color: #cbd5e1; background: rgba(30, 41, 59, 0.8); border: 1px solid rgba(51, 65, 85, 0.8);">
       Pilih soal di kiri
      </div>
      
-     <button id="reset-btn" onclick="resetGame()" class="flex items-center gap-2 px-4 py-3 rounded-2xl font-bold text-base transition-all hover:scale-105 shadow-sm" style="background: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.3); color: #38bdf8;"> 
-      <i data-lucide="refresh-cw" style="width: 20px; height: 20px;"></i> Ulang 
+     <button id="reset-btn" onclick="resetGame()" class="flex items-center gap-1 md:gap-2 px-3 py-2.5 md:py-3 rounded-xl md:rounded-2xl font-bold text-xs md:text-base transition-all shadow-sm active:scale-95" style="background: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.3); color: #38bdf8;"> 
+      <i data-lucide="refresh-cw" class="w-4 h-4 md:w-5 md:h-5"></i> <span class="hidden sm:inline">Ulang</span>
      </button>
     </div>
     
-    <div id="game-board" class="relative">
+    <div id="game-board" class="relative pb-6">
      <svg id="svg-lines" class="line-connector"></svg>
-     <div class="grid grid-cols-3 gap-x-6 gap-y-8 items-center" id="match-grid">
+     <div class="grid grid-cols-[1fr_20px_1fr] md:grid-cols-[1fr_60px_1fr] gap-y-4 md:gap-y-6 items-center justify-items-center" id="match-grid">
        </div>
     </div>
     
-    <div id="end-screen" class="hidden mt-8 text-center py-8 px-6 rounded-3xl bounce-in relative overflow-hidden shadow-2xl">
-     <div id="end-icon" class="text-6xl mb-4 relative z-10">🏆</div>
-     <h2 id="end-title" class="text-3xl font-black mb-2 relative z-10">Musuh Berhasil Dikalahkan!</h2>
-     <p id="end-subtitle" class="font-semibold text-lg relative z-10" style="color: #cbd5e1;">Kamu adalah master perkalian!</p>
+    <div id="end-screen" class="hidden mt-4 md:mt-8 text-center py-6 px-4 rounded-2xl md:rounded-3xl bounce-in relative overflow-hidden shadow-2xl">
+     <div id="end-icon" class="text-5xl md:text-6xl mb-3 relative z-10">🏆</div>
+     <h2 id="end-title" class="text-xl md:text-3xl font-black mb-1 md:mb-2 relative z-10 leading-tight">Musuh Dikalahkan!</h2>
+     <p id="end-subtitle" class="font-semibold text-xs md:text-lg relative z-10" style="color: #cbd5e1;">Kamu master perkalian!</p>
     </div>
 
    </div>
@@ -244,55 +246,64 @@
 
     // ===== AUDIO & SFX CONTROLS =====
     const bgMusic = document.getElementById('bg-music');
+    const sfxSelect = document.getElementById('sfx-select');
+    const sfxNinja = document.getElementById('sfx-ninja');
+    const sfxEnemy = document.getElementById('sfx-enemy');
+    
     const musicToggleBtn = document.getElementById('music-toggle');
     let isMusicPlaying = false;
-    bgMusic.volume = 0.3; // Volume BGM agar tidak menutupi SFX
+    bgMusic.volume = 0.25; 
 
-    // Kumpulan Sound Effects (SFX)
-    const sfx = {
-        select: new Audio('https://assets.mixkit.co/sfx/preview/mixkit-arcade-retro-changing-tab-206.mp3'),
-        ninja: new Audio('https://assets.mixkit.co/sfx/preview/mixkit-sword-strikes-armor-2765.mp3'),
-        enemy: new Audio('https://assets.mixkit.co/sfx/preview/mixkit-fire-explosion-1343.mp3')
-    };
+    // Buka kunci (unlock) audio di browser mobile pada klik pertama
+    let audioUnlocked = false;
+    function unlockAudio() {
+        if(audioUnlocked) return;
+        [sfxSelect, sfxNinja, sfxEnemy].forEach(audio => {
+            audio.volume = 0; // bisukan saat unlock
+            let playPromise = audio.play();
+            if (playPromise !== undefined) {
+                playPromise.then(() => {
+                    audio.pause();
+                    audio.currentTime = 0;
+                    audio.volume = 0.8; // kembalikan volume normal
+                }).catch(e => console.log("Audio unlock blokir:", e));
+            }
+        });
+        audioUnlocked = true;
+    }
 
-    // Fungsi untuk memutar SFX
-    function playSFX(type) {
-        if (!isMusicPlaying) return; // Jika tombol 🔇 aktif, SFX juga tidak bunyi
-        const sound = sfx[type];
-        if (sound) {
-            sound.currentTime = 0; // Reset ke awal agar bisa diputar cepat berulang kali
-            sound.volume = 0.7; // Volume SFX lebih kencang
-            sound.play().catch(e => console.log("SFX diblokir browser:", e));
+    function playSFX(audioElement) {
+        if (!isMusicPlaying) return; 
+        if (audioElement) {
+            audioElement.currentTime = 0;
+            let playPromise = audioElement.play();
+            if(playPromise !== undefined) {
+                playPromise.catch(e => console.log("SFX blokir:", e));
+            }
         }
     }
 
     function toggleMusic(event) {
         if (event) event.stopPropagation();
+        unlockAudio();
         
         if (isMusicPlaying) {
             bgMusic.pause();
             musicToggleBtn.textContent = '🔇';
             isMusicPlaying = false;
         } else {
-            bgMusic.play().catch(e => console.log("Gagal memutar audio:", e));
+            bgMusic.play().catch(e => console.log("BGM diblokir:", e));
             musicToggleBtn.textContent = '🔊';
             isMusicPlaying = true;
         }
     }
 
-    // Auto-play cerdas pada interaksi pertama
-    document.body.addEventListener('click', function initAudio() {
-        if (!isMusicPlaying) {
-            toggleMusic();
-        }
-        document.body.removeEventListener('click', initAudio);
-    }, { once: true });
-
-
     // ===== FUNGSI GETAR (HAPTIC FEEDBACK) =====
     function triggerVibration(pattern) {
         if ("vibrate" in navigator) {
-            navigator.vibrate(pattern);
+            try {
+                navigator.vibrate(pattern);
+            } catch(e) { console.log("Getar gagal:", e); }
         }
     }
 
@@ -338,16 +349,15 @@
 
     // --- NAVIGATION ---
     function startGame(mode) {
-        playSFX('select'); // Putar efek suara saat klik menu
+        unlockAudio();
+        playSFX(sfxSelect);
         currentMode = mode;
         const conf = MODES[currentMode];
         currentProblems = conf.problems;
         
-        // Setup UI texts
         document.getElementById('enemy-hp-label').textContent = conf.enemyName + ' HP';
         document.getElementById('game-instruction-text').textContent = conf.instruction_text;
         
-        // Hide home, show game
         document.getElementById('home-view').classList.add('hidden');
         document.getElementById('game-view').classList.remove('hidden');
         
@@ -355,10 +365,10 @@
     }
 
     function goHome() {
-        playSFX('select'); // Putar efek suara
+        playSFX(sfxSelect);
         document.getElementById('game-view').classList.add('hidden');
         document.getElementById('home-view').classList.remove('hidden');
-        document.getElementById('svg-lines').innerHTML = ''; // clear lines
+        document.getElementById('svg-lines').innerHTML = '';
     }
 
     // --- UTILS ---
@@ -377,11 +387,11 @@
       grid.innerHTML = '';
 
       currentProblems.forEach((p, i) => {
-        // Soal: Tangerine/Orange palette
+        // Soal
         const qDiv = document.createElement('div');
-        qDiv.className = 'flex justify-center';
+        qDiv.className = 'w-full flex justify-end';
         qDiv.innerHTML = `
-          <div class="match-card q-card pop-in flex items-center justify-center w-full max-w-[170px] py-5 px-3 rounded-2xl text-center font-extrabold text-2xl cursor-pointer select-none shadow-md"
+          <div class="match-card q-card pop-in flex items-center justify-center w-full max-w-[110px] md:max-w-[170px] py-3 md:py-5 px-2 md:px-3 rounded-xl md:rounded-2xl text-center font-black text-lg md:text-2xl cursor-pointer select-none shadow-md"
                data-qid="${p.id}"
                style="animation-delay:${i * 0.1}s; background-color: #1e293b; border: 2px solid rgba(249, 115, 22, 0.4); color: #f97316;"
                onclick="selectQuestion(${p.id})">
@@ -389,15 +399,16 @@
           </div>`;
         grid.appendChild(qDiv);
 
+        // Spacer tengah (Garis)
         const mid = document.createElement('div');
         grid.appendChild(mid);
 
-        // Jawaban: Sky Blue palette
+        // Jawaban
         const ans = shuffledAnswers[i];
         const aDiv = document.createElement('div');
-        aDiv.className = 'flex justify-center';
+        aDiv.className = 'w-full flex justify-start';
         aDiv.innerHTML = `
-          <div class="match-card a-card pop-in flex items-center justify-center w-full max-w-[170px] py-5 px-3 rounded-2xl text-center font-extrabold text-2xl cursor-pointer select-none shadow-md"
+          <div class="match-card a-card pop-in flex items-center justify-center w-full max-w-[110px] md:max-w-[170px] py-3 md:py-5 px-2 md:px-3 rounded-xl md:rounded-2xl text-center font-black text-lg md:text-2xl cursor-pointer select-none shadow-md"
                data-aid="${ans.id}"
                style="animation-delay:${i * 0.1 + 0.15}s; background-color: #1e293b; border: 2px solid rgba(56, 189, 248, 0.4); color: #38bdf8;"
                onclick="selectAnswer(${ans.id})">
@@ -419,18 +430,21 @@
 
     // --- BATTLE ANIMATION ---
     function triggerNinjaAttack() {
-      playSFX('ninja'); // Putar efek suara tebasan Ninja
+      playSFX(sfxNinja); 
       const ninja = document.getElementById('ninja-char');
       const enemy = document.getElementById('enemy-char');
       const effect = document.getElementById('battle-effect');
-
-      ninja.style.transform = 'scaleX(-1) translateX(-90px) scale(1.3)';
+      
+      // Jarak maju disesuaikan agar tidak keluar batas di layar kecil
+      const dashDistance = window.innerWidth < 600 ? '-50px' : '-90px';
+      ninja.style.transform = `scaleX(-1) translateX(${dashDistance}) scale(1.3)`;
       
       setTimeout(() => {
-        effect.textContent = '💥'; effect.style.opacity = '1'; effect.style.transform = 'translate(-50%, -50%) scale(1.5)';
+        effect.textContent = '💥'; effect.style.opacity = '1'; effect.style.transform = 'translate(-50%, -50%) scale(1.3)';
         enemy.classList.add('shake', 'enemy-hurt');
         
-        triggerVibration(100);
+        // Getaran sukses pendek untuk Android
+        triggerVibration(80);
 
         enemyHP--; updateHPDisplays();
         
@@ -450,18 +464,20 @@
     }
 
     function triggerEnemyAttack() {
-      playSFX('enemy'); // Putar efek suara semburan/ledakan Musuh
+      playSFX(sfxEnemy);
       const ninja = document.getElementById('ninja-char');
       const enemy = document.getElementById('enemy-char');
       const effect = document.getElementById('battle-effect');
 
-      enemy.style.transform = 'translateX(-90px) scale(1.3)';
+      const dashDistance = window.innerWidth < 600 ? '-50px' : '-90px';
+      enemy.style.transform = `translateX(${dashDistance}) scale(1.3)`;
       
       setTimeout(() => {
-        effect.textContent = '🔥'; effect.style.opacity = '1'; effect.style.transform = 'translate(-50%, -50%) scale(1.8)'; effect.style.filter = 'drop-shadow(0 0 10px rgba(249, 115, 22, 0.8))';
+        effect.textContent = '🔥'; effect.style.opacity = '1'; effect.style.transform = 'translate(-50%, -50%) scale(1.5)'; effect.style.filter = 'drop-shadow(0 0 10px rgba(249, 115, 22, 0.8))';
         ninja.classList.add('shake', 'ninja-hurt');
         
-        triggerVibration([200, 100, 200]);
+        // Getaran kritis untuk Android
+        triggerVibration([150, 50, 200]);
         
         ninjaHP = 0; updateHPDisplays();
 
@@ -469,7 +485,7 @@
           enemy.style.transform = 'translateX(0) scale(1)'; effect.style.opacity = '0'; effect.style.transform = 'translate(-50%, -50%) scale(1)'; effect.style.filter = '';
           ninja.classList.remove('shake', 'ninja-hurt');
           
-          ninja.textContent = '🪦'; ninja.style.transform = 'scaleX(-1) translateY(10px) scale(0.9)'; ninja.style.filter = 'grayscale(1)';
+          ninja.textContent = '🪦'; ninja.style.transform = 'scaleX(-1) translateY(10px) scale(0.8)'; ninja.style.filter = 'grayscale(1)';
           triggerGameEnd('lose');
 
         }, 400);
@@ -492,15 +508,19 @@
 
         if (condition === 'win') {
             endScreen.style.background = 'linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(15, 23, 42, 0.9))'; endScreen.style.borderColor = 'rgba(16, 185, 129, 0.4)';
-            endIcon.textContent = '🏆'; endTitle.textContent = `${conf.enemyName} Dikalahkan!`; endTitle.style.color = '#10b981';
-            endSubtitle.textContent = 'Kamu adalah master perkalian sejati!';
-            spawnConfetti(); setStatus('🏆 Menang!');
+            endIcon.textContent = '🏆'; endTitle.textContent = `${conf.enemyName} Tumbang!`; endTitle.style.color = '#10b981';
+            endSubtitle.textContent = 'Kamu adalah master perkalian!';
             
-            triggerVibration([100, 50, 100, 50, 200]); 
+            // Generate less confetti on mobile to prevent lag
+            let confettiCount = window.innerWidth < 600 ? 20 : 40;
+            spawnConfetti(confettiCount); 
+            setStatus('🏆 Menang!');
+            
+            triggerVibration([100, 50, 100, 50, 150]); 
         } else {
             endScreen.style.background = 'linear-gradient(135deg, rgba(244, 63, 94, 0.2), rgba(15, 23, 42, 0.9))'; endScreen.style.borderColor = 'rgba(244, 63, 94, 0.4)';
             endIcon.textContent = '☠️'; endTitle.textContent = 'Ninja Gugur!'; endTitle.style.color = '#f43f5e';
-            endSubtitle.textContent = 'Coba lagi! Ingat, jangan sampai salah jawaban.';
+            endSubtitle.textContent = 'Awas, perhatikan jawabanmu.';
             setStatus('❌ Game Over!');
         }
         endScreen.classList.remove('hidden');
@@ -509,9 +529,9 @@
     // --- LOGIC PERTANDINGAN ---
     function selectQuestion(qid) {
       if (isLocked || isGameOver || matches[qid]) return; clearSelections(); selectedQ = qid;
-      const el = document.querySelector(`[data-qid="${qid}"]`); el.classList.add('selected', 'glow-pulse'); el.style.boxShadow = '0 0 15px rgba(249, 115, 22, 0.4)'; setStatus('Sekarang pilih jawaban di kanan');
+      const el = document.querySelector(`[data-qid="${qid}"]`); el.classList.add('selected', 'glow-pulse'); el.style.boxShadow = '0 0 10px rgba(249, 115, 22, 0.5)'; setStatus('Sekarang pilih jawaban di kanan');
       
-      triggerVibration(20); 
+      triggerVibration(15); 
       checkMatch();
     }
 
@@ -520,10 +540,10 @@
       for (const k in matches) { if (matches[k].a_id === aid) return; }
       document.querySelectorAll('.a-card.selected').forEach(el => { el.classList.remove('selected', 'glow-pulse'); el.style.boxShadow = ''; });
       selectedA = aid;
-      const el = document.querySelector(`[data-aid="${aid}"]`); el.classList.add('selected', 'glow-pulse'); el.style.boxShadow = '0 0 15px rgba(56, 189, 248, 0.4)';
+      const el = document.querySelector(`[data-aid="${aid}"]`); el.classList.add('selected', 'glow-pulse'); el.style.boxShadow = '0 0 10px rgba(56, 189, 248, 0.5)';
       if (selectedQ === null) setStatus('Pilih soal di kiri dulu');
       
-      triggerVibration(20);
+      triggerVibration(15);
       checkMatch();
     }
 
@@ -544,17 +564,17 @@
       if (isCorrect) {
         matches[selectedQ] = { a_id: selectedA, correct: true };
         qEl.classList.remove('selected', 'glow-pulse'); aEl.classList.remove('selected', 'glow-pulse');
-        [qEl, aEl].forEach(el => { el.classList.add('matched'); el.style.backgroundColor = '#1e293b'; el.style.borderColor = '#10b981'; el.style.color = '#10b981'; el.style.boxShadow = '0 0 12px rgba(16, 185, 129, 0.3)'; });
+        [qEl, aEl].forEach(el => { el.classList.add('matched'); el.style.backgroundColor = '#1e293b'; el.style.borderColor = '#10b981'; el.style.color = '#10b981'; el.style.boxShadow = '0 0 8px rgba(16, 185, 129, 0.3)'; });
         void qEl.offsetWidth; void aEl.offsetWidth;
         drawLine(qEl, aEl, '#10b981', selectedQ);
         triggerNinjaAttack();
-        setStatus('⚔️ Serangan Ninja Berhasil!');
+        setStatus('⚔️ Serangan Berhasil!');
         selectedQ = null; selectedA = null;
         setTimeout(() => { if (!isGameOver) isLocked = false; }, 800);
       } else {
         triggerEnemyAttack();
         qEl.classList.add('shake'); aEl.classList.add('shake'); qEl.style.borderColor = '#f43f5e'; aEl.style.borderColor = '#ff4d4d';
-        setStatus('🔥 Semburan Maut Musuh!');
+        setStatus('🔥 Semburan Musuh!');
         disableAllCards(); 
       }
     }
@@ -564,11 +584,16 @@
       const svg = document.getElementById('svg-lines'); const board = document.getElementById('game-board'); 
       svg.setAttribute('width', board.offsetWidth); svg.setAttribute('height', board.offsetHeight); 
       const bRect = board.getBoundingClientRect(); const fRect = fromEl.getBoundingClientRect(); const tRect = toEl.getBoundingClientRect(); 
-      const startX = (fRect.right - bRect.left) - 15; const startY = fRect.top + (fRect.height / 2) - bRect.top; 
-      const endX = (tRect.left - bRect.left) + 15; const endY = tRect.top + (tRect.height / 2) - bRect.top; 
-      const controlPointOffset = 60; const pathData = `M ${startX} ${startY} C ${startX + controlPointOffset} ${startY}, ${endX - controlPointOffset} ${endY}, ${endX} ${endY}`; 
+      
+      const startX = (fRect.right - bRect.left) - 10; const startY = fRect.top + (fRect.height / 2) - bRect.top; 
+      const endX = (tRect.left - bRect.left) + 10; const endY = tRect.top + (tRect.height / 2) - bRect.top; 
+      
+      // Control point melengkung disesuaikan ukuran layar
+      const controlPointOffset = window.innerWidth < 600 ? 30 : 60; 
+      const pathData = `M ${startX} ${startY} C ${startX + controlPointOffset} ${startY}, ${endX - controlPointOffset} ${endY}, ${endX} ${endY}`; 
+      
       let path = document.querySelector(`path[data-line-id="${idStr}"]`);
-      if (!path) { path = document.createElementNS('http://www.w3.org/2000/svg', 'path'); path.setAttribute('data-line-id', idStr); path.setAttribute('stroke', color); path.setAttribute('stroke-width', '4'); path.setAttribute('fill', 'none'); path.setAttribute('stroke-linecap', 'round'); path.setAttribute('stroke-dasharray', '8,6'); path.classList.add('drawn-line'); path.style.opacity = '0.8'; svg.appendChild(path); }
+      if (!path) { path = document.createElementNS('http://www.w3.org/2000/svg', 'path'); path.setAttribute('data-line-id', idStr); path.setAttribute('stroke', color); path.setAttribute('stroke-width', '4'); path.setAttribute('fill', 'none'); path.setAttribute('stroke-linecap', 'round'); path.setAttribute('stroke-dasharray', '6,6'); path.classList.add('drawn-line'); path.style.opacity = '0.8'; svg.appendChild(path); }
       path.setAttribute('d', pathData);
     }
     
@@ -584,14 +609,16 @@
     // --- LAINNYA ---
     function setStatus(msg) { document.getElementById('status-msg').textContent = msg; }
 
-    function spawnConfetti() { 
+    function spawnConfetti(count) { 
         const colors = ['#f97316', '#38bdf8', '#10b981', '#f43f5e', '#a78bfa']; 
-        for (let i = 0; i < 40; i++) { 
-            const piece = document.createElement('div'); piece.className = 'confetti-piece'; piece.style.left = Math.random() * 100 + '%'; piece.style.top = '-10px'; piece.style.background = colors[Math.floor(Math.random() * colors.length)]; piece.style.animationDelay = Math.random() * 1 + 's'; piece.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px'; piece.style.width = (6 + Math.random() * 8) + 'px'; piece.style.height = (6 + Math.random() * 8) + 'px'; document.body.appendChild(piece); setTimeout(() => piece.remove(), 3500); 
+        for (let i = 0; i < count; i++) { 
+            const piece = document.createElement('div'); piece.className = 'confetti-piece'; piece.style.left = Math.random() * 100 + '%'; piece.style.background = colors[Math.floor(Math.random() * colors.length)]; piece.style.animationDelay = Math.random() * 0.5 + 's'; 
+            document.body.appendChild(piece); setTimeout(() => piece.remove(), 3000); 
         } 
     }
 
     function resetGame() {
+      if(isGameOver) playSFX(sfxSelect);
       const conf = MODES[currentMode];
       matches = {}; selectedQ = null; selectedA = null; isLocked = false; isGameOver = false;
       ninjaHP = MAX_NINJA_HP; enemyHP = MAX_ENEMY_HP;
@@ -602,7 +629,6 @@
       
       const ninja = document.getElementById('ninja-char'); ninja.textContent = '🥷'; ninja.style.transform = 'scaleX(-1)'; ninja.style.filter = ''; ninja.classList.remove('ninja-hurt');
       
-      // Reset Musuh sesuai mode
       const enemy = document.getElementById('enemy-char'); 
       enemy.textContent = conf.enemyIcon; 
       enemy.style.transform = ''; 
