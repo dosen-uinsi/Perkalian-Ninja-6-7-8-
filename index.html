@@ -1,0 +1,615 @@
+<!doctype html>
+<html lang="id" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ninja Perkalian - By Mathnology</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&amp;display=swap" rel="stylesheet">
+  <style>
+    * { font-family: 'Nunito', sans-serif; }
+
+    @keyframes popIn {
+      0% { transform: scale(0.5); opacity: 0; }
+      70% { transform: scale(1.1); }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20% { transform: translateX(-8px); }
+      40% { transform: translateX(8px); }
+      60% { transform: translateX(-6px); }
+      80% { transform: translateX(6px); }
+    }
+    @keyframes bounceIn {
+      0% { transform: scale(0); }
+      50% { transform: scale(1.2); }
+      100% { transform: scale(1); }
+    }
+    @keyframes blood-splatter-ninja {
+      0% { transform: translate(-50%, -50%) scale(0); opacity: 1; }
+      100% { transform: translate(calc(-50% + 40px), calc(-50% + 40px)) scale(1.5); opacity: 0; }
+    }
+    @keyframes blood-splatter-enemy {
+      0% { transform: translate(-50%, -50%) scale(0); opacity: 1; }
+      100% { transform: translate(calc(-50% - 40px), calc(-50% + 40px)) scale(1.5); opacity: 0; }
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-10px); }
+    }
+    
+    .pop-in { animation: popIn 0.4s ease-out forwards; }
+    .shake { animation: shake 0.5s ease-in-out; }
+    .bounce-in { animation: bounceIn 0.5s ease-out forwards; }
+    .float { animation: float 3s ease-in-out infinite; }
+
+    .match-card {
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor: pointer;
+      user-select: none;
+      position: relative;
+      z-index: 60; 
+    }
+    .match-card:hover:not(.matched):not(.selected):not(.disabled) {
+      transform: translateY(-4px) scale(1.03);
+    }
+    .match-card.selected {
+      transform: scale(1.05);
+    }
+    .match-card.matched {
+      cursor: default;
+      opacity: 0.85; 
+    }
+    .match-card.disabled {
+        cursor: not-allowed;
+        opacity: 0.6;
+        pointer-events: none;
+    }
+
+    .confetti-piece {
+      position: fixed;
+      width: 10px;
+      height: 10px;
+      border-radius: 2px;
+      animation: confetti-fall 2.5s ease-in forwards;
+      pointer-events: none;
+      z-index: 100;
+    }
+    
+    .line-connector {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 50; 
+      overflow: visible; 
+    }
+    
+    path.drawn-line {
+      transition: d 0.2s ease-out;
+    }
+
+    /* Battle Arena Styles */
+    .char-sprite {
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      display: inline-block;
+    }
+    
+    #battle-effect {
+      pointer-events: none;
+      z-index: 20;
+    }
+    
+    .ninja-hurt {
+        filter: drop-shadow(0 0 20px rgba(244, 63, 94, 0.8)) brightness(1.3) saturate(3);
+    }
+    
+    .enemy-hurt {
+        filter: drop-shadow(0 0 20px rgba(16, 185, 129, 0.8)) brightness(1.3) saturate(3);
+    }
+
+    /* Menu Buttons Hover */
+    .menu-btn {
+        transition: all 0.3s ease;
+    }
+    .menu-btn:hover {
+        transform: translateY(-5px) scale(1.02);
+        box-shadow: 0 10px 25px -5px rgba(0,0,0,0.5);
+    }
+
+    /* Music Toggle Button */
+    #music-toggle {
+        transition: all 0.2s;
+    }
+    #music-toggle:hover {
+        transform: scale(1.1);
+    }
+  </style>
+  <style>body { box-sizing: border-box; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+ </head>
+ <body class="h-full text-slate-200">
+  <div id="app-wrapper" class="h-full w-full overflow-auto relative" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);">
+   
+   <audio id="bg-music" loop>
+       <source src="https://assets.mixkit.co/music/preview/mixkit-arcade-retro-background-219.mp3" type="audio/mpeg">
+   </audio>
+
+   <button id="music-toggle" onclick="toggleMusic(event)" class="fixed top-4 right-4 z-50 bg-slate-800/80 border-2 border-slate-600 rounded-full w-12 h-12 flex items-center justify-center text-2xl shadow-lg backdrop-blur-sm" title="Matikan/Nyalakan Suara">
+       🔇
+   </button>
+
+   <div style="position:fixed;top:-40px;right:-40px;width:200px;height:200px;border-radius:50%;background:rgba(249, 115, 22, 0.05);pointer-events:none;z-index:0;"></div>
+   <div style="position:fixed;bottom:-60px;left:-60px;width:250px;height:250px;border-radius:50%;background:rgba(56, 189, 248, 0.05);pointer-events:none;z-index:0;"></div>
+
+   <div id="home-view" class="max-w-3xl mx-auto px-4 py-12 relative z-10 flex flex-col items-center justify-center min-h-full">
+       
+       <div class="text-center mb-10 float">
+           <div class="text-7xl mb-4">🥷✨</div>
+           <h1 class="text-5xl md:text-6xl font-black tracking-tight mb-1" style="color: #f8fafc;">Ninja <span style="color: #f97316;">Perkalian</span></h1>
+           <h2 class="text-sm md:text-base font-extrabold uppercase mb-4" style="color: #38bdf8; letter-spacing: 0.25em;">By Mathnology</h2>
+           <p class="text-xl font-semibold" style="color: #94a3b8;">Bantu Ninja mengalahkan monster dengan kekuatan Matematika!</p>
+       </div>
+
+       <div class="w-full max-w-md flex flex-col gap-5">
+           <button onclick="startGame('6')" class="menu-btn relative overflow-hidden rounded-3xl p-6 text-left flex items-center justify-between group" style="background: linear-gradient(135deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.9)); border: 2px solid rgba(56, 189, 248, 0.4);">
+               <div class="flex flex-col">
+                   <span class="text-2xl font-black mb-1" style="color: #38bdf8;">Perkalian 6</span>
+                   <span class="text-sm font-semibold" style="color: #94a3b8;">Lawan: Naga 🐉</span>
+               </div>
+               <div class="text-5xl transform transition-transform group-hover:scale-110">🐉</div>
+           </button>
+
+           <button onclick="startGame('78')" class="menu-btn relative overflow-hidden rounded-3xl p-6 text-left flex items-center justify-between group" style="background: linear-gradient(135deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.9)); border: 2px solid rgba(244, 63, 94, 0.4);">
+               <div class="flex flex-col">
+                   <span class="text-2xl font-black mb-1" style="color: #f43f5e;">Perkalian 7 & 8</span>
+                   <span class="text-sm font-semibold" style="color: #94a3b8;">Lawan: Raksasa 👹</span>
+               </div>
+               <div class="text-5xl transform transition-transform group-hover:scale-110">👹</div>
+           </button>
+       </div>
+   </div>
+
+   <div id="game-view" class="max-w-3xl mx-auto px-4 py-6 relative z-10 hidden">
+    
+    <header class="text-center mb-6">
+     <h1 class="text-3xl md:text-4xl font-black tracking-tight mb-1" style="color: #f8fafc;">Ninja <span style="color: #f97316;">Perkalian</span></h1>
+     <h2 class="text-xs md:text-sm font-extrabold uppercase mb-3" style="color: #38bdf8; letter-spacing: 0.25em;">By Mathnology</h2>
+     <p id="game-instruction-text" class="text-base font-semibold" style="color: #94a3b8;">Jawab benar 3 kali untuk menang!</p>
+    </header>
+
+    <div class="relative border-2 rounded-3xl p-6 mb-6 shadow-2xl" style="background-color: rgba(15, 23, 42, 0.6); border-color: rgba(51, 65, 85, 0.8);">
+        
+        <div class="flex justify-between items-center mb-5 pb-4 border-b border-slate-700/60">
+            <div class="flex flex-col items-start gap-1">
+                <span class="font-bold text-xs uppercase tracking-wider text-slate-400">Ninja HP</span>
+                <div id="ninja-hp-hearts" class="text-2xl flex gap-1" style="color: #f43f5e;">❤️</div>
+            </div>
+            
+            <div class="font-black text-xl text-slate-500">VS</div>
+            
+            <div class="flex flex-col items-end gap-1">
+                <span id="enemy-hp-label" class="font-bold text-xs uppercase tracking-wider text-slate-400">Musuh HP</span>
+                <div id="enemy-hp-hearts" class="text-2xl flex gap-1" style="color: #10b981;">💚💚💚</div>
+            </div>
+        </div>
+
+        <div class="flex justify-between items-center relative py-6 px-4 overflow-hidden rounded-2xl" style="background-color: rgba(0, 0, 0, 0.2);">
+            <div id="ninja-char" class="char-sprite text-7xl md:text-8xl z-10 drop-shadow-xl" style="transform: scaleX(-1);">🥷</div>
+            
+            <div id="battle-effect" class="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 text-6xl md:text-7xl opacity-0 z-20">💥</div>
+            
+            <div id="blood-effect" class="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 text-7xl opacity-0 z-20">🩸</div>
+            
+            <div id="enemy-char" class="char-sprite text-7xl md:text-8xl z-10 drop-shadow-xl">🐉</div>
+        </div>
+    </div>
+    
+    <div class="flex items-center justify-between mb-5 px-2 gap-3">
+     <button onclick="goHome()" class="flex items-center justify-center p-3 rounded-2xl transition-all hover:scale-105 shadow-sm" style="background: rgba(248, 113, 113, 0.1); border: 1px solid rgba(248, 113, 113, 0.3); color: #f87171;" title="Kembali ke Menu">
+         <i data-lucide="home" style="width: 20px; height: 20px;"></i>
+     </button>
+     
+     <div id="status-msg" class="font-bold text-base px-4 py-3 rounded-2xl text-center flex-1 shadow-sm truncate" style="color: #cbd5e1; background: rgba(30, 41, 59, 0.8); border: 1px solid rgba(51, 65, 85, 0.8);">
+      Pilih soal di kiri
+     </div>
+     
+     <button id="reset-btn" onclick="resetGame()" class="flex items-center gap-2 px-4 py-3 rounded-2xl font-bold text-base transition-all hover:scale-105 shadow-sm" style="background: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.3); color: #38bdf8;"> 
+      <i data-lucide="refresh-cw" style="width: 20px; height: 20px;"></i> Ulang 
+     </button>
+    </div>
+    
+    <div id="game-board" class="relative">
+     <svg id="svg-lines" class="line-connector"></svg>
+     <div class="grid grid-cols-3 gap-x-6 gap-y-8 items-center" id="match-grid">
+       </div>
+    </div>
+    
+    <div id="end-screen" class="hidden mt-8 text-center py-8 px-6 rounded-3xl bounce-in relative overflow-hidden shadow-2xl">
+     <div id="end-icon" class="text-6xl mb-4 relative z-10">🏆</div>
+     <h2 id="end-title" class="text-3xl font-black mb-2 relative z-10">Musuh Berhasil Dikalahkan!</h2>
+     <p id="end-subtitle" class="font-semibold text-lg relative z-10" style="color: #cbd5e1;">Kamu adalah master perkalian!</p>
+    </div>
+
+   </div>
+  </div>
+  
+  <script>
+    if (window.lucide) lucide.createIcons();
+
+    // ===== AUDIO & SFX CONTROLS =====
+    const bgMusic = document.getElementById('bg-music');
+    const musicToggleBtn = document.getElementById('music-toggle');
+    let isMusicPlaying = false;
+    bgMusic.volume = 0.3; // Volume BGM agar tidak menutupi SFX
+
+    // Kumpulan Sound Effects (SFX)
+    const sfx = {
+        select: new Audio('https://assets.mixkit.co/sfx/preview/mixkit-arcade-retro-changing-tab-206.mp3'),
+        ninja: new Audio('https://assets.mixkit.co/sfx/preview/mixkit-sword-strikes-armor-2765.mp3'),
+        enemy: new Audio('https://assets.mixkit.co/sfx/preview/mixkit-fire-explosion-1343.mp3')
+    };
+
+    // Fungsi untuk memutar SFX
+    function playSFX(type) {
+        if (!isMusicPlaying) return; // Jika tombol 🔇 aktif, SFX juga tidak bunyi
+        const sound = sfx[type];
+        if (sound) {
+            sound.currentTime = 0; // Reset ke awal agar bisa diputar cepat berulang kali
+            sound.volume = 0.7; // Volume SFX lebih kencang
+            sound.play().catch(e => console.log("SFX diblokir browser:", e));
+        }
+    }
+
+    function toggleMusic(event) {
+        if (event) event.stopPropagation();
+        
+        if (isMusicPlaying) {
+            bgMusic.pause();
+            musicToggleBtn.textContent = '🔇';
+            isMusicPlaying = false;
+        } else {
+            bgMusic.play().catch(e => console.log("Gagal memutar audio:", e));
+            musicToggleBtn.textContent = '🔊';
+            isMusicPlaying = true;
+        }
+    }
+
+    // Auto-play cerdas pada interaksi pertama
+    document.body.addEventListener('click', function initAudio() {
+        if (!isMusicPlaying) {
+            toggleMusic();
+        }
+        document.body.removeEventListener('click', initAudio);
+    }, { once: true });
+
+
+    // ===== FUNGSI GETAR (HAPTIC FEEDBACK) =====
+    function triggerVibration(pattern) {
+        if ("vibrate" in navigator) {
+            navigator.vibrate(pattern);
+        }
+    }
+
+    // ===== GAME DATA CONFIG =====
+    const MODES = {
+        '6': {
+            enemyName: 'Naga',
+            enemyIcon: '🐉',
+            instruction_text: 'Tarik garis untuk menyerang Naga 🐉',
+            problems: [
+                { q: '6 × 6', a: 36, id: 0 },
+                { q: '6 × 7', a: 42, id: 1 },
+                { q: '6 × 8', a: 48, id: 2 }
+            ]
+        },
+        '78': {
+            enemyName: 'Raksasa',
+            enemyIcon: '👹', 
+            instruction_text: 'Tarik garis untuk menyerang Raksasa 👹',
+            problems: [
+                { q: '7 × 7', a: 49, id: 0 },
+                { q: '7 × 8', a: 56, id: 1 },
+                { q: '8 × 8', a: 64, id: 2 }
+            ]
+        }
+    };
+
+    const MAX_NINJA_HP = 1;
+    const MAX_ENEMY_HP = 3;
+
+    // Game States
+    let currentMode = '6';
+    let currentProblems = [];
+    let shuffledAnswers = [];
+    let selectedQ = null;
+    let selectedA = null;
+    let matches = {}; 
+    let isLocked = false; 
+    let isGameOver = false;
+
+    let ninjaHP = MAX_NINJA_HP;
+    let enemyHP = MAX_ENEMY_HP;
+
+    // --- NAVIGATION ---
+    function startGame(mode) {
+        playSFX('select'); // Putar efek suara saat klik menu
+        currentMode = mode;
+        const conf = MODES[currentMode];
+        currentProblems = conf.problems;
+        
+        // Setup UI texts
+        document.getElementById('enemy-hp-label').textContent = conf.enemyName + ' HP';
+        document.getElementById('game-instruction-text').textContent = conf.instruction_text;
+        
+        // Hide home, show game
+        document.getElementById('home-view').classList.add('hidden');
+        document.getElementById('game-view').classList.remove('hidden');
+        
+        resetGame();
+    }
+
+    function goHome() {
+        playSFX('select'); // Putar efek suara
+        document.getElementById('game-view').classList.add('hidden');
+        document.getElementById('home-view').classList.remove('hidden');
+        document.getElementById('svg-lines').innerHTML = ''; // clear lines
+    }
+
+    // --- UTILS ---
+    function shuffle(arr) {
+      const a = [...arr];
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
+    function buildBoard() {
+      shuffledAnswers = shuffle(currentProblems.map(p => ({ val: p.a, id: p.id })));
+      const grid = document.getElementById('match-grid');
+      grid.innerHTML = '';
+
+      currentProblems.forEach((p, i) => {
+        // Soal: Tangerine/Orange palette
+        const qDiv = document.createElement('div');
+        qDiv.className = 'flex justify-center';
+        qDiv.innerHTML = `
+          <div class="match-card q-card pop-in flex items-center justify-center w-full max-w-[170px] py-5 px-3 rounded-2xl text-center font-extrabold text-2xl cursor-pointer select-none shadow-md"
+               data-qid="${p.id}"
+               style="animation-delay:${i * 0.1}s; background-color: #1e293b; border: 2px solid rgba(249, 115, 22, 0.4); color: #f97316;"
+               onclick="selectQuestion(${p.id})">
+            ${p.q}
+          </div>`;
+        grid.appendChild(qDiv);
+
+        const mid = document.createElement('div');
+        grid.appendChild(mid);
+
+        // Jawaban: Sky Blue palette
+        const ans = shuffledAnswers[i];
+        const aDiv = document.createElement('div');
+        aDiv.className = 'flex justify-center';
+        aDiv.innerHTML = `
+          <div class="match-card a-card pop-in flex items-center justify-center w-full max-w-[170px] py-5 px-3 rounded-2xl text-center font-extrabold text-2xl cursor-pointer select-none shadow-md"
+               data-aid="${ans.id}"
+               style="animation-delay:${i * 0.1 + 0.15}s; background-color: #1e293b; border: 2px solid rgba(56, 189, 248, 0.4); color: #38bdf8;"
+               onclick="selectAnswer(${ans.id})">
+            ${ans.val}
+          </div>`;
+        grid.appendChild(aDiv);
+      });
+    }
+
+    // --- HP UPDATE ---
+    function updateHPDisplays() {
+        const ninjaHPContainer = document.getElementById('ninja-hp-hearts');
+        ninjaHPContainer.innerHTML = Array(ninjaHP).fill('❤️').join('');
+        if (ninjaHP === 0) ninjaHPContainer.innerHTML = '☠️';
+
+        const enemyHPContainer = document.getElementById('enemy-hp-hearts');
+        enemyHPContainer.innerHTML = Array(enemyHP).fill('💚').join('');
+    }
+
+    // --- BATTLE ANIMATION ---
+    function triggerNinjaAttack() {
+      playSFX('ninja'); // Putar efek suara tebasan Ninja
+      const ninja = document.getElementById('ninja-char');
+      const enemy = document.getElementById('enemy-char');
+      const effect = document.getElementById('battle-effect');
+
+      ninja.style.transform = 'scaleX(-1) translateX(-90px) scale(1.3)';
+      
+      setTimeout(() => {
+        effect.textContent = '💥'; effect.style.opacity = '1'; effect.style.transform = 'translate(-50%, -50%) scale(1.5)';
+        enemy.classList.add('shake', 'enemy-hurt');
+        
+        triggerVibration(100);
+
+        enemyHP--; updateHPDisplays();
+        
+        setTimeout(() => {
+          ninja.style.transform = 'scaleX(-1) translateX(0) scale(1)'; effect.style.opacity = '0'; effect.style.transform = 'translate(-50%, -50%) scale(1)';
+          enemy.classList.remove('shake', 'enemy-hurt');
+          enemy.style.transform = ''; 
+          
+          if (enemyHP <= 0) {
+              enemy.textContent = '💀'; 
+              enemy.style.transform = 'scaleX(1) scale(0.8)'; 
+              enemy.style.filter = 'grayscale(1)';
+              triggerGameEnd('win');
+          }
+        }, 400);
+      }, 200);
+    }
+
+    function triggerEnemyAttack() {
+      playSFX('enemy'); // Putar efek suara semburan/ledakan Musuh
+      const ninja = document.getElementById('ninja-char');
+      const enemy = document.getElementById('enemy-char');
+      const effect = document.getElementById('battle-effect');
+
+      enemy.style.transform = 'translateX(-90px) scale(1.3)';
+      
+      setTimeout(() => {
+        effect.textContent = '🔥'; effect.style.opacity = '1'; effect.style.transform = 'translate(-50%, -50%) scale(1.8)'; effect.style.filter = 'drop-shadow(0 0 10px rgba(249, 115, 22, 0.8))';
+        ninja.classList.add('shake', 'ninja-hurt');
+        
+        triggerVibration([200, 100, 200]);
+        
+        ninjaHP = 0; updateHPDisplays();
+
+        setTimeout(() => {
+          enemy.style.transform = 'translateX(0) scale(1)'; effect.style.opacity = '0'; effect.style.transform = 'translate(-50%, -50%) scale(1)'; effect.style.filter = '';
+          ninja.classList.remove('shake', 'ninja-hurt');
+          
+          ninja.textContent = '🪦'; ninja.style.transform = 'scaleX(-1) translateY(10px) scale(0.9)'; ninja.style.filter = 'grayscale(1)';
+          triggerGameEnd('lose');
+
+        }, 400);
+      }, 200);
+    }
+
+    // --- GAME END LOGIC ---
+    function disableAllCards() {
+        document.querySelectorAll('.match-card:not(.matched)').forEach(el => el.classList.add('disabled'));
+    }
+
+    function triggerGameEnd(condition) {
+        isGameOver = true;
+        disableAllCards();
+        const conf = MODES[currentMode];
+        const endScreen = document.getElementById('end-screen');
+        const endIcon = document.getElementById('end-icon');
+        const endTitle = document.getElementById('end-title');
+        const endSubtitle = document.getElementById('end-subtitle');
+
+        if (condition === 'win') {
+            endScreen.style.background = 'linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(15, 23, 42, 0.9))'; endScreen.style.borderColor = 'rgba(16, 185, 129, 0.4)';
+            endIcon.textContent = '🏆'; endTitle.textContent = `${conf.enemyName} Dikalahkan!`; endTitle.style.color = '#10b981';
+            endSubtitle.textContent = 'Kamu adalah master perkalian sejati!';
+            spawnConfetti(); setStatus('🏆 Menang!');
+            
+            triggerVibration([100, 50, 100, 50, 200]); 
+        } else {
+            endScreen.style.background = 'linear-gradient(135deg, rgba(244, 63, 94, 0.2), rgba(15, 23, 42, 0.9))'; endScreen.style.borderColor = 'rgba(244, 63, 94, 0.4)';
+            endIcon.textContent = '☠️'; endTitle.textContent = 'Ninja Gugur!'; endTitle.style.color = '#f43f5e';
+            endSubtitle.textContent = 'Coba lagi! Ingat, jangan sampai salah jawaban.';
+            setStatus('❌ Game Over!');
+        }
+        endScreen.classList.remove('hidden');
+    }
+
+    // --- LOGIC PERTANDINGAN ---
+    function selectQuestion(qid) {
+      if (isLocked || isGameOver || matches[qid]) return; clearSelections(); selectedQ = qid;
+      const el = document.querySelector(`[data-qid="${qid}"]`); el.classList.add('selected', 'glow-pulse'); el.style.boxShadow = '0 0 15px rgba(249, 115, 22, 0.4)'; setStatus('Sekarang pilih jawaban di kanan');
+      
+      triggerVibration(20); 
+      checkMatch();
+    }
+
+    function selectAnswer(aid) {
+      if (isLocked || isGameOver) return;
+      for (const k in matches) { if (matches[k].a_id === aid) return; }
+      document.querySelectorAll('.a-card.selected').forEach(el => { el.classList.remove('selected', 'glow-pulse'); el.style.boxShadow = ''; });
+      selectedA = aid;
+      const el = document.querySelector(`[data-aid="${aid}"]`); el.classList.add('selected', 'glow-pulse'); el.style.boxShadow = '0 0 15px rgba(56, 189, 248, 0.4)';
+      if (selectedQ === null) setStatus('Pilih soal di kiri dulu');
+      
+      triggerVibration(20);
+      checkMatch();
+    }
+
+    function clearSelections() {
+      document.querySelectorAll('.match-card.selected').forEach(el => { el.classList.remove('selected', 'glow-pulse'); el.style.boxShadow = ''; });
+      selectedQ = null; selectedA = null;
+    }
+
+    function checkMatch() {
+      if (selectedQ === null || selectedA === null) return;
+      const problem = currentProblems.find(p => p.id === selectedQ);
+      const isCorrect = problem.id === selectedA;
+      const qEl = document.querySelector(`[data-qid="${selectedQ}"]`);
+      const aEl = document.querySelector(`[data-aid="${selectedA}"]`);
+
+      isLocked = true;
+
+      if (isCorrect) {
+        matches[selectedQ] = { a_id: selectedA, correct: true };
+        qEl.classList.remove('selected', 'glow-pulse'); aEl.classList.remove('selected', 'glow-pulse');
+        [qEl, aEl].forEach(el => { el.classList.add('matched'); el.style.backgroundColor = '#1e293b'; el.style.borderColor = '#10b981'; el.style.color = '#10b981'; el.style.boxShadow = '0 0 12px rgba(16, 185, 129, 0.3)'; });
+        void qEl.offsetWidth; void aEl.offsetWidth;
+        drawLine(qEl, aEl, '#10b981', selectedQ);
+        triggerNinjaAttack();
+        setStatus('⚔️ Serangan Ninja Berhasil!');
+        selectedQ = null; selectedA = null;
+        setTimeout(() => { if (!isGameOver) isLocked = false; }, 800);
+      } else {
+        triggerEnemyAttack();
+        qEl.classList.add('shake'); aEl.classList.add('shake'); qEl.style.borderColor = '#f43f5e'; aEl.style.borderColor = '#ff4d4d';
+        setStatus('🔥 Semburan Maut Musuh!');
+        disableAllCards(); 
+      }
+    }
+
+    // --- GARIS PENGHUBUNG & RESIZE ---
+    function drawLine(fromEl, toEl, color, idStr) {
+      const svg = document.getElementById('svg-lines'); const board = document.getElementById('game-board'); 
+      svg.setAttribute('width', board.offsetWidth); svg.setAttribute('height', board.offsetHeight); 
+      const bRect = board.getBoundingClientRect(); const fRect = fromEl.getBoundingClientRect(); const tRect = toEl.getBoundingClientRect(); 
+      const startX = (fRect.right - bRect.left) - 15; const startY = fRect.top + (fRect.height / 2) - bRect.top; 
+      const endX = (tRect.left - bRect.left) + 15; const endY = tRect.top + (tRect.height / 2) - bRect.top; 
+      const controlPointOffset = 60; const pathData = `M ${startX} ${startY} C ${startX + controlPointOffset} ${startY}, ${endX - controlPointOffset} ${endY}, ${endX} ${endY}`; 
+      let path = document.querySelector(`path[data-line-id="${idStr}"]`);
+      if (!path) { path = document.createElementNS('http://www.w3.org/2000/svg', 'path'); path.setAttribute('data-line-id', idStr); path.setAttribute('stroke', color); path.setAttribute('stroke-width', '4'); path.setAttribute('fill', 'none'); path.setAttribute('stroke-linecap', 'round'); path.setAttribute('stroke-dasharray', '8,6'); path.classList.add('drawn-line'); path.style.opacity = '0.8'; svg.appendChild(path); }
+      path.setAttribute('d', pathData);
+    }
+    
+    window.addEventListener('resize', () => { 
+        if(document.getElementById('game-view').classList.contains('hidden')) return; 
+        for (const qid in matches) { 
+            const qEl = document.querySelector(`[data-qid="${qid}"]`); 
+            const aEl = document.querySelector(`[data-aid="${matches[qid].a_id}"]`); 
+            if(qEl && aEl) drawLine(qEl, aEl, '#10b981', qid); 
+        } 
+    });
+
+    // --- LAINNYA ---
+    function setStatus(msg) { document.getElementById('status-msg').textContent = msg; }
+
+    function spawnConfetti() { 
+        const colors = ['#f97316', '#38bdf8', '#10b981', '#f43f5e', '#a78bfa']; 
+        for (let i = 0; i < 40; i++) { 
+            const piece = document.createElement('div'); piece.className = 'confetti-piece'; piece.style.left = Math.random() * 100 + '%'; piece.style.top = '-10px'; piece.style.background = colors[Math.floor(Math.random() * colors.length)]; piece.style.animationDelay = Math.random() * 1 + 's'; piece.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px'; piece.style.width = (6 + Math.random() * 8) + 'px'; piece.style.height = (6 + Math.random() * 8) + 'px'; document.body.appendChild(piece); setTimeout(() => piece.remove(), 3500); 
+        } 
+    }
+
+    function resetGame() {
+      const conf = MODES[currentMode];
+      matches = {}; selectedQ = null; selectedA = null; isLocked = false; isGameOver = false;
+      ninjaHP = MAX_NINJA_HP; enemyHP = MAX_ENEMY_HP;
+      document.getElementById('svg-lines').innerHTML = '';
+      document.getElementById('end-screen').classList.add('hidden');
+      setStatus('Pilih soal di kiri');
+      updateHPDisplays();
+      
+      const ninja = document.getElementById('ninja-char'); ninja.textContent = '🥷'; ninja.style.transform = 'scaleX(-1)'; ninja.style.filter = ''; ninja.classList.remove('ninja-hurt');
+      
+      // Reset Musuh sesuai mode
+      const enemy = document.getElementById('enemy-char'); 
+      enemy.textContent = conf.enemyIcon; 
+      enemy.style.transform = ''; 
+      enemy.style.filter = ''; 
+      
+      buildBoard();
+    }
+  </script>
+ </body>
+</html>
