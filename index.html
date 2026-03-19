@@ -135,17 +135,16 @@
        <source src="https://raw.githubusercontent.com/dosen-uinsi/Perkalian-Ninja-6-7-8-/main/Pertarungan%20Ninja.mp3" type="audio/mpeg">
    </audio>
    
-   <audio id="sfx-select" preload="auto">
-       <source src="https://assets.mixkit.co/sfx/preview/mixkit-arcade-retro-changing-tab-206.mp3" type="audio/mpeg">
-   </audio>
    <audio id="sfx-start" preload="auto">
-       <source src="https://assets.mixkit.co/sfx/preview/mixkit-deep-gong-strike-2046.mp3" type="audio/mpeg">
+       <source src="https://raw.githubusercontent.com/dosen-uinsi/Perkalian-Ninja-6-7-8-/main/266566__gowlermusic__gong-hit.wav" type="audio/wav">
    </audio>
+
    <audio id="sfx-ninja" preload="auto">
-       <source src="https://assets.mixkit.co/sfx/preview/mixkit-sword-strikes-armor-2765.mp3" type="audio/mpeg">
+       <source src="https://raw.githubusercontent.com/dosen-uinsi/Perkalian-Ninja-6-7-8-/main/441666__ethanchase7744__sword-slash.wav" type="audio/wav">
    </audio>
+
    <audio id="sfx-enemy" preload="auto">
-       <source src="https://assets.mixkit.co/sfx/preview/mixkit-fire-explosion-1343.mp3" type="audio/mpeg">
+       <source src="https://raw.githubusercontent.com/dosen-uinsi/Perkalian-Ninja-6-7-8-/main/368511__jofae__8-bit-fireball.mp3" type="audio/mpeg">
    </audio>
 
    <div style="position:fixed;top:-20px;right:-20px;width:150px;height:150px;border-radius:50%;background:rgba(249, 115, 22, 0.05);pointer-events:none;z-index:0;"></div>
@@ -220,8 +219,6 @@
             
             <div id="battle-effect" class="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 text-5xl md:text-7xl opacity-0 z-20">💥</div>
             
-            <div id="blood-effect" class="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 text-7xl opacity-0 z-20">🩸</div>
-            
             <div id="enemy-char" class="char-sprite text-5xl md:text-7xl z-10 drop-shadow-xl">🐉</div>
         </div>
     </div>
@@ -260,7 +257,6 @@
 
     // ===== AUDIO & SFX CONTROLS =====
     const bgMusic = document.getElementById('bg-music');
-    const sfxSelect = document.getElementById('sfx-select');
     const sfxStart = document.getElementById('sfx-start');
     const sfxNinja = document.getElementById('sfx-ninja');
     const sfxEnemy = document.getElementById('sfx-enemy');
@@ -268,11 +264,12 @@
     bgMusic.volume = 0.5; // Sesuaikan volume musik latar
     let isAudioUnlocked = false;
 
-    // Buka kunci audio saat layar pertama kali diketuk (Bypass aturan browser)
+    // Buka kunci audio saat layar pertama kali diketuk (Bypass aturan browser HP)
     function unlockAudio() {
         if(isAudioUnlocked) return; 
 
-        [sfxSelect, sfxStart, sfxNinja, sfxEnemy].forEach(audio => {
+        // Mainkan dan pause SFX dengan cepat agar sistem HP mengizinkan suaranya diputar
+        [sfxStart, sfxNinja, sfxEnemy].forEach(audio => {
             let playPromise = audio.play();
             if (playPromise !== undefined) {
                 playPromise.then(() => {
@@ -282,7 +279,7 @@
             }
         });
         
-        // Mulai mainkan musik Background secara terus menerus (hanya di menu)
+        // Mulai mainkan musik Background untuk menu
         bgMusic.play().catch(e => console.log("BGM diblokir:", e));
         
         isAudioUnlocked = true;
@@ -290,8 +287,7 @@
 
     // Transisi dari Splash Screen ke Menu Utama
     function enterMainMenu() {
-        unlockAudio(); // Buka kunci suara saat disentuh!
-        playSFX(sfxSelect);
+        unlockAudio(); // Suara diaktifkan sejak ketukan pertama di Cover
         
         document.getElementById('splash-view').classList.add('hidden');
         document.getElementById('home-view').classList.remove('hidden');
@@ -358,8 +354,11 @@
 
     // --- NAVIGATION ---
     function startGame(mode) {
-        bgMusic.pause(); // Hentikan BGM saat masuk permainan
-        playSFX(sfxStart); // Mainkan SFX Gong saat masuk arena
+        // Matikan Musik Latar agar anak bisa fokus
+        bgMusic.pause(); 
+        
+        // Putar Suara Gong Penanda Masuk Arena
+        playSFX(sfxStart); 
         
         currentMode = mode;
         const conf = MODES[currentMode];
@@ -375,8 +374,8 @@
     }
 
     function goHome() {
-        playSFX(sfxSelect);
-        bgMusic.play().catch(e => console.log(e)); // Putar BGM kembali saat di menu
+        // Nyalakan kembali musik latar saat keluar dari arena
+        bgMusic.play().catch(e => console.log(e)); 
         
         document.getElementById('game-view').classList.add('hidden');
         document.getElementById('home-view').classList.remove('hidden');
@@ -443,7 +442,9 @@
 
     // --- BATTLE ANIMATION ---
     function triggerNinjaAttack() {
+      // Putar Suara Tebasan Pedang Ninja
       playSFX(sfxNinja); 
+      
       const ninja = document.getElementById('ninja-char');
       const enemy = document.getElementById('enemy-char');
       const effect = document.getElementById('battle-effect');
@@ -475,7 +476,9 @@
     }
 
     function triggerEnemyAttack() {
+      // Putar Suara Ledakan Musuh (8-bit)
       playSFX(sfxEnemy);
+      
       const ninja = document.getElementById('ninja-char');
       const enemy = document.getElementById('enemy-char');
       const effect = document.getElementById('battle-effect');
@@ -626,7 +629,6 @@
     }
 
     function resetGame() {
-      if(isGameOver) playSFX(sfxSelect);
       const conf = MODES[currentMode];
       matches = {}; selectedQ = null; selectedA = null; isLocked = false; isGameOver = false;
       ninjaHP = MAX_NINJA_HP; enemyHP = MAX_ENEMY_HP;
