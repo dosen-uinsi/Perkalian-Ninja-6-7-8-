@@ -72,16 +72,15 @@
 
     .confetti-piece {
       position: fixed;
-      width: 8px;
-      height: 8px;
-      border-radius: 2px;
-      animation: confetti-fall 2.5s ease-in forwards;
+      top: -30px; 
       pointer-events: none;
-      z-index: 100;
+      z-index: 9999; 
+      opacity: 0;
     }
     @keyframes confetti-fall {
-      0% { transform: translateY(-10px) rotate(0deg); opacity: 1; }
-      100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+      0% { transform: translateY(0) rotate(0deg) scale(1); opacity: 1; }
+      50% { opacity: 1; }
+      100% { transform: translateY(110vh) rotate(720deg) scale(0.8); opacity: 0; }
     }
     
     .line-connector {
@@ -134,23 +133,18 @@
    <audio id="bg-music" loop preload="auto">
        <source src="https://raw.githubusercontent.com/dosen-uinsi/Perkalian-Ninja-6-7-8-/main/Pertarungan%20Ninja.mp3" type="audio/mpeg">
    </audio>
-   
    <audio id="sfx-start" preload="auto">
        <source src="https://raw.githubusercontent.com/dosen-uinsi/Perkalian-Ninja-6-7-8-/main/266566__gowlermusic__gong-hit.wav" type="audio/wav">
    </audio>
-
    <audio id="sfx-ninja" preload="auto">
        <source src="https://raw.githubusercontent.com/dosen-uinsi/Perkalian-Ninja-6-7-8-/main/441666__ethanchase7744__sword-slash.wav" type="audio/wav">
    </audio>
-
    <audio id="sfx-enemy" preload="auto">
        <source src="https://raw.githubusercontent.com/dosen-uinsi/Perkalian-Ninja-6-7-8-/main/368511__jofae__8-bit-fireball.mp3" type="audio/mpeg">
    </audio>
-
    <audio id="sfx-win" preload="auto">
        <source src="https://raw.githubusercontent.com/dosen-uinsi/Perkalian-Ninja-6-7-8-/main/840820__silverillusionist__victory-fanfare-8-bit-flag-1.wav" type="audio/wav">
    </audio>
-
    <audio id="sfx-lose" preload="auto">
        <source src="https://raw.githubusercontent.com/dosen-uinsi/Perkalian-Ninja-6-7-8-/main/652328__imataco__lose-sound.wav" type="audio/wav">
    </audio>
@@ -171,7 +165,6 @@
    </div>
 
    <div id="home-view" class="max-w-3xl mx-auto px-4 py-8 relative z-10 flex flex-col items-center justify-center min-h-full hidden">
-       
        <div class="text-center mb-8 float">
            <div class="text-6xl md:text-7xl mb-3 drop-shadow-md">🥷✨</div>
            <h1 class="text-5xl md:text-6xl font-black tracking-tight mb-2" style="color: #f8fafc; line-height: 1.1;">Ninja<br><span style="color: #f97316;">Perkalian</span></h1>
@@ -199,7 +192,6 @@
    </div>
 
    <div id="game-view" class="max-w-3xl mx-auto px-3 py-6 md:py-8 relative z-10 hidden">
-    
     <header class="text-center mb-5 md:mb-6">
      <h1 class="text-2xl md:text-4xl font-black tracking-tight mb-1" style="color: #f8fafc;">Ninja <span style="color: #f97316;">Perkalian</span></h1>
      <h2 class="text-[10px] md:text-sm font-extrabold uppercase mb-2" style="color: #38bdf8; letter-spacing: 0.25em;">By Mathnology</h2>
@@ -207,15 +199,12 @@
     </header>
 
     <div class="relative border-2 rounded-2xl md:rounded-3xl p-4 md:p-6 mb-5 shadow-2xl" style="background-color: rgba(15, 23, 42, 0.6); border-color: rgba(51, 65, 85, 0.8);">
-        
         <div class="flex justify-between items-center mb-3 pb-3 border-b border-slate-700/60">
             <div class="flex flex-col items-start gap-0.5">
                 <span class="font-bold text-[10px] md:text-xs uppercase tracking-wider text-slate-400">Ninja HP</span>
                 <div id="ninja-hp-hearts" class="text-lg md:text-2xl flex gap-1" style="color: #f43f5e;">❤️</div>
             </div>
-            
             <div class="font-black text-sm md:text-xl text-slate-500">VS</div>
-            
             <div class="flex flex-col items-end gap-0.5">
                 <span id="enemy-hp-label" class="font-bold text-[10px] md:text-xs uppercase tracking-wider text-slate-400">Musuh HP</span>
                 <div id="enemy-hp-hearts" class="text-lg md:text-2xl flex gap-1" style="color: #10b981;">💚💚💚</div>
@@ -224,9 +213,7 @@
 
         <div class="flex justify-between items-center relative py-5 px-2 md:px-4 overflow-hidden rounded-xl md:rounded-2xl" style="background-color: rgba(0, 0, 0, 0.2);">
             <div id="ninja-char" class="char-sprite text-5xl md:text-7xl z-10 drop-shadow-xl" style="transform: scaleX(-1);">🥷</div>
-            
             <div id="battle-effect" class="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 text-5xl md:text-7xl opacity-0 z-20">💥</div>
-            
             <div id="enemy-char" class="char-sprite text-5xl md:text-7xl z-10 drop-shadow-xl">🐉</div>
         </div>
     </div>
@@ -250,14 +237,13 @@
      <div class="grid grid-cols-[auto_1fr_auto] gap-x-2 md:gap-x-6 gap-y-4 md:gap-y-6 items-center w-full" id="match-grid">
        </div>
     </div>
-
    </div>
 
-   <div id="end-screen" class="hidden fixed inset-0 z-[100] flex items-center justify-center px-4 backdrop-blur-sm transition-opacity" style="background-color: rgba(15, 23, 42, 0.85);">
-       <div id="end-card" class="text-center py-8 px-6 rounded-[2rem] bounce-in relative overflow-hidden shadow-2xl w-full max-w-[320px] border-2">
-         <div id="end-icon" class="text-6xl md:text-7xl mb-4 relative z-10">🏆</div>
-         <h2 id="end-title" class="text-2xl md:text-3xl font-black mb-2 relative z-10 leading-tight">Musuh Dikalahkan!</h2>
-         <p id="end-subtitle" class="font-semibold text-sm md:text-base relative z-10 mb-8" style="color: #cbd5e1;">Kamu master perkalian!</p>
+   <div id="end-screen" class="hidden fixed inset-0 z-[100] flex items-end justify-center px-4 pb-10 md:pb-16 transition-opacity" style="background-color: rgba(15, 23, 42, 0.6);">
+       <div id="end-card" class="text-center py-6 px-6 rounded-[2rem] bounce-in relative overflow-hidden shadow-2xl w-full max-w-[320px] border-2">
+         <div id="end-icon" class="text-6xl md:text-7xl mb-3 relative z-10">🏆</div>
+         <h2 id="end-title" class="text-2xl md:text-3xl font-black mb-1 relative z-10 leading-tight">Musuh Dikalahkan!</h2>
+         <p id="end-subtitle" class="font-semibold text-sm md:text-base relative z-10 mb-6" style="color: #cbd5e1;">Kamu master perkalian!</p>
          
          <div class="flex items-center justify-center gap-3 md:gap-4 relative z-10">
              <button onclick="goHome()" class="flex-1 flex justify-center items-center gap-2 px-4 py-3.5 rounded-2xl font-bold transition-transform active:scale-95 shadow-md" style="background: rgba(248, 113, 113, 0.15); border: 1px solid rgba(248, 113, 113, 0.4); color: #f87171;">
@@ -269,7 +255,6 @@
          </div>
        </div>
    </div>
-
   </div>
   
   <script>
@@ -286,7 +271,7 @@
     bgMusic.volume = 0.5; 
     let isAudioUnlocked = false;
 
-    // Buka kunci semua elemen audio agar siap diputar di browser HP
+    // Buka kunci semua elemen audio
     function unlockAudio() {
         if(isAudioUnlocked) return; 
 
@@ -322,7 +307,6 @@
     }
 
     function stopEndSounds() {
-        // Matikan suara menang/kalah jika pemain menekan tombol dengan cepat
         sfxWin.pause(); sfxWin.currentTime = 0;
         sfxLose.pause(); sfxLose.currentTime = 0;
     }
@@ -330,9 +314,7 @@
     // ===== FUNGSI GETAR (HAPTIC FEEDBACK) =====
     function triggerVibration(pattern) {
         if ("vibrate" in navigator) {
-            try {
-                navigator.vibrate(pattern);
-            } catch(e) { console.log("Getar gagal:", e); }
+            try { navigator.vibrate(pattern); } catch(e) { console.log("Getar gagal:", e); }
         }
     }
 
@@ -363,7 +345,6 @@
     const MAX_NINJA_HP = 1;
     const MAX_ENEMY_HP = 3;
 
-    // Game States
     let currentMode = '6';
     let currentProblems = [];
     let shuffledAnswers = [];
@@ -395,9 +376,9 @@
     }
 
     function goHome() {
-        stopEndSounds(); // Hentikan SFX menang/kalah
+        stopEndSounds(); 
         document.getElementById('end-screen').classList.add('hidden');
-        bgMusic.play().catch(e => console.log(e)); // Putar musik menu lagi
+        bgMusic.play().catch(e => console.log(e)); 
         
         document.getElementById('game-view').classList.add('hidden');
         document.getElementById('home-view').classList.remove('hidden');
@@ -420,7 +401,6 @@
       grid.innerHTML = '';
 
       currentProblems.forEach((p, i) => {
-        // Soal: Dipaksa ke ujung kiri (justify-start)
         const qDiv = document.createElement('div');
         qDiv.className = 'w-full flex justify-start';
         qDiv.innerHTML = `
@@ -432,12 +412,10 @@
           </div>`;
         grid.appendChild(qDiv);
 
-        // Ruang kosong untuk garis
         const mid = document.createElement('div');
         mid.className = 'w-full h-full';
         grid.appendChild(mid);
 
-        // Jawaban: Dipaksa ke ujung kanan (justify-end)
         const ans = shuffledAnswers[i];
         const aDiv = document.createElement('div');
         aDiv.className = 'w-full flex justify-end';
@@ -476,7 +454,6 @@
       setTimeout(() => {
         effect.textContent = '💥'; effect.style.opacity = '1'; effect.style.transform = 'translate(-50%, -50%) scale(1.3)';
         enemy.classList.add('shake', 'enemy-hurt');
-        
         triggerVibration(80);
 
         enemyHP--; updateHPDisplays();
@@ -509,7 +486,6 @@
       setTimeout(() => {
         effect.textContent = '🔥'; effect.style.opacity = '1'; effect.style.transform = 'translate(-50%, -50%) scale(1.5)'; effect.style.filter = 'drop-shadow(0 0 10px rgba(249, 115, 22, 0.8))';
         ninja.classList.add('shake', 'ninja-hurt');
-        
         triggerVibration([150, 50, 200]);
         
         ninjaHP = 0; updateHPDisplays();
@@ -541,8 +517,7 @@
         const endSubtitle = document.getElementById('end-subtitle');
 
         if (condition === 'win') {
-            playSFX(sfxWin); // Putar Musik Menang
-            
+            playSFX(sfxWin); 
             endCard.style.background = 'linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(15, 23, 42, 0.98))'; 
             endCard.style.borderColor = 'rgba(16, 185, 129, 0.4)';
             endIcon.textContent = '🏆'; 
@@ -550,14 +525,13 @@
             endTitle.style.color = '#10b981';
             endSubtitle.textContent = 'Kamu adalah master perkalian!';
             
-            let confettiCount = window.innerWidth < 600 ? 20 : 40;
+            let confettiCount = window.innerWidth < 600 ? 30 : 50;
             spawnConfetti(confettiCount); 
-            setStatus('🏆 Menang!');
             
+            setStatus('🏆 Menang!');
             triggerVibration([100, 50, 100, 50, 150]); 
         } else {
-            playSFX(sfxLose); // Putar Musik Kalah
-            
+            playSFX(sfxLose); 
             endCard.style.background = 'linear-gradient(135deg, rgba(244, 63, 94, 0.2), rgba(15, 23, 42, 0.98))'; 
             endCard.style.borderColor = 'rgba(244, 63, 94, 0.4)';
             endIcon.textContent = '☠️'; 
@@ -573,7 +547,6 @@
     function selectQuestion(qid) {
       if (isLocked || isGameOver || matches[qid]) return; clearSelections(); selectedQ = qid;
       const el = document.querySelector(`[data-qid="${qid}"]`); el.classList.add('selected', 'glow-pulse'); el.style.boxShadow = '0 0 10px rgba(249, 115, 22, 0.5)'; setStatus('Sekarang pilih jawaban di kanan');
-      
       triggerVibration(15); 
       checkMatch();
     }
@@ -585,7 +558,6 @@
       selectedA = aid;
       const el = document.querySelector(`[data-aid="${aid}"]`); el.classList.add('selected', 'glow-pulse'); el.style.boxShadow = '0 0 10px rgba(56, 189, 248, 0.5)';
       if (selectedQ === null) setStatus('Pilih soal di kiri dulu');
-      
       triggerVibration(15);
       checkMatch();
     }
@@ -652,26 +624,37 @@
     function setStatus(msg) { document.getElementById('status-msg').textContent = msg; }
 
     function spawnConfetti(count) { 
-        const colors = ['#f97316', '#38bdf8', '#10b981', '#f43f5e', '#a78bfa']; 
+        const colors = ['#f97316', '#38bdf8', '#10b981', '#f43f5e', '#a78bfa', '#fbbf24']; 
         for (let i = 0; i < count; i++) { 
-            const piece = document.createElement('div'); piece.className = 'confetti-piece'; piece.style.left = Math.random() * 100 + '%'; piece.style.background = colors[Math.floor(Math.random() * colors.length)]; piece.style.animationDelay = Math.random() * 0.5 + 's'; 
-            document.body.appendChild(piece); setTimeout(() => piece.remove(), 3000); 
+            const piece = document.createElement('div'); 
+            piece.className = 'confetti-piece'; 
+            piece.style.left = Math.random() * 100 + 'vw'; 
+            
+            const isRibbon = Math.random() > 0.4;
+            piece.style.width = isRibbon ? '8px' : '12px';
+            piece.style.height = isRibbon ? '26px' : '12px';
+            piece.style.borderRadius = isRibbon ? '4px' : '2px';
+            
+            piece.style.background = colors[Math.floor(Math.random() * colors.length)]; 
+            
+            const duration = Math.random() * 2 + 2; 
+            const delay = Math.random() * 0.5;
+            piece.style.animation = `confetti-fall ${duration}s ease-in ${delay}s forwards`;
+            
+            document.body.appendChild(piece); 
+            setTimeout(() => piece.remove(), (duration + delay) * 1000); 
         } 
     }
 
     function resetGame() {
-      stopEndSounds(); // Hentikan suara menang/kalah jika dipencet cepat
-      
-      // Putar Suara Gong saat mengulang
+      stopEndSounds(); 
       playSFX(sfxStart);
       
       const conf = MODES[currentMode];
       matches = {}; selectedQ = null; selectedA = null; isLocked = false; isGameOver = false;
       ninjaHP = MAX_NINJA_HP; enemyHP = MAX_ENEMY_HP;
       
-      // Sembunyikan Pop-Up saat main lagi
       document.getElementById('end-screen').classList.add('hidden');
-      
       document.getElementById('svg-lines').innerHTML = '';
       setStatus('Pilih soal di kiri');
       updateHPDisplays();
