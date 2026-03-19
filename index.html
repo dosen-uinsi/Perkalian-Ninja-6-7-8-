@@ -24,9 +24,9 @@
       80% { transform: translateX(4px); }
     }
     @keyframes bounceIn {
-      0% { transform: scale(0); }
-      50% { transform: scale(1.2); }
-      100% { transform: scale(1); }
+      0% { transform: scale(0.8); opacity: 0; }
+      60% { transform: scale(1.05); opacity: 1; }
+      100% { transform: scale(1); opacity: 1; }
     }
     @keyframes float {
       0%, 100% { transform: translateY(0px); }
@@ -39,7 +39,7 @@
     
     .pop-in { animation: popIn 0.4s ease-out forwards; }
     .shake { animation: shake 0.4s ease-in-out; }
-    .bounce-in { animation: bounceIn 0.5s ease-out forwards; }
+    .bounce-in { animation: bounceIn 0.3s ease-out forwards; }
     .float { animation: float 3s ease-in-out infinite; }
     .pulse-slow { animation: pulse-slow 2s infinite ease-in-out; }
 
@@ -147,6 +147,14 @@
        <source src="https://raw.githubusercontent.com/dosen-uinsi/Perkalian-Ninja-6-7-8-/main/368511__jofae__8-bit-fireball.mp3" type="audio/mpeg">
    </audio>
 
+   <audio id="sfx-win" preload="auto">
+       <source src="https://raw.githubusercontent.com/dosen-uinsi/Perkalian-Ninja-6-7-8-/main/840820__silverillusionist__victory-fanfare-8-bit-flag-1.wav" type="audio/wav">
+   </audio>
+
+   <audio id="sfx-lose" preload="auto">
+       <source src="https://raw.githubusercontent.com/dosen-uinsi/Perkalian-Ninja-6-7-8-/main/652328__imataco__lose-sound.wav" type="audio/wav">
+   </audio>
+
    <div style="position:fixed;top:-20px;right:-20px;width:150px;height:150px;border-radius:50%;background:rgba(249, 115, 22, 0.05);pointer-events:none;z-index:0;"></div>
    <div style="position:fixed;bottom:-30px;left:-30px;width:180px;height:180px;border-radius:50%;background:rgba(56, 189, 248, 0.05);pointer-events:none;z-index:0;"></div>
 
@@ -242,14 +250,26 @@
      <div class="grid grid-cols-[auto_1fr_auto] gap-x-2 md:gap-x-6 gap-y-4 md:gap-y-6 items-center w-full" id="match-grid">
        </div>
     </div>
-    
-    <div id="end-screen" class="hidden mt-4 md:mt-8 text-center py-6 px-4 rounded-2xl md:rounded-3xl bounce-in relative overflow-hidden shadow-2xl">
-     <div id="end-icon" class="text-5xl md:text-6xl mb-3 relative z-10">🏆</div>
-     <h2 id="end-title" class="text-xl md:text-3xl font-black mb-1 md:mb-2 relative z-10 leading-tight">Musuh Dikalahkan!</h2>
-     <p id="end-subtitle" class="font-semibold text-xs md:text-lg relative z-10" style="color: #cbd5e1;">Kamu master perkalian!</p>
-    </div>
 
    </div>
+
+   <div id="end-screen" class="hidden fixed inset-0 z-[100] flex items-center justify-center px-4 backdrop-blur-sm transition-opacity" style="background-color: rgba(15, 23, 42, 0.85);">
+       <div id="end-card" class="text-center py-8 px-6 rounded-[2rem] bounce-in relative overflow-hidden shadow-2xl w-full max-w-[320px] border-2">
+         <div id="end-icon" class="text-6xl md:text-7xl mb-4 relative z-10">🏆</div>
+         <h2 id="end-title" class="text-2xl md:text-3xl font-black mb-2 relative z-10 leading-tight">Musuh Dikalahkan!</h2>
+         <p id="end-subtitle" class="font-semibold text-sm md:text-base relative z-10 mb-8" style="color: #cbd5e1;">Kamu master perkalian!</p>
+         
+         <div class="flex items-center justify-center gap-3 md:gap-4 relative z-10">
+             <button onclick="goHome()" class="flex-1 flex justify-center items-center gap-2 px-4 py-3.5 rounded-2xl font-bold transition-transform active:scale-95 shadow-md" style="background: rgba(248, 113, 113, 0.15); border: 1px solid rgba(248, 113, 113, 0.4); color: #f87171;">
+                 <i data-lucide="home" class="w-5 h-5"></i> Menu
+             </button>
+             <button onclick="resetGame()" class="flex-1 flex justify-center items-center gap-2 px-4 py-3.5 rounded-2xl font-bold transition-transform active:scale-95 shadow-md" style="background: rgba(56, 189, 248, 0.15); border: 1px solid rgba(56, 189, 248, 0.4); color: #38bdf8;">
+                 <i data-lucide="refresh-cw" class="w-5 h-5"></i> Ulang
+             </button>
+         </div>
+       </div>
+   </div>
+
   </div>
   
   <script>
@@ -260,16 +280,17 @@
     const sfxStart = document.getElementById('sfx-start');
     const sfxNinja = document.getElementById('sfx-ninja');
     const sfxEnemy = document.getElementById('sfx-enemy');
+    const sfxWin = document.getElementById('sfx-win');
+    const sfxLose = document.getElementById('sfx-lose');
     
-    bgMusic.volume = 0.5; // Sesuaikan volume musik latar
+    bgMusic.volume = 0.5; 
     let isAudioUnlocked = false;
 
-    // Buka kunci audio saat layar pertama kali diketuk (Bypass aturan browser HP)
+    // Buka kunci semua elemen audio agar siap diputar di browser HP
     function unlockAudio() {
         if(isAudioUnlocked) return; 
 
-        // Mainkan dan pause SFX dengan cepat agar sistem HP mengizinkan suaranya diputar
-        [sfxStart, sfxNinja, sfxEnemy].forEach(audio => {
+        [sfxStart, sfxNinja, sfxEnemy, sfxWin, sfxLose].forEach(audio => {
             let playPromise = audio.play();
             if (playPromise !== undefined) {
                 playPromise.then(() => {
@@ -279,16 +300,13 @@
             }
         });
         
-        // Mulai mainkan musik Background untuk menu
         bgMusic.play().catch(e => console.log("BGM diblokir:", e));
-        
         isAudioUnlocked = true;
     }
 
     // Transisi dari Splash Screen ke Menu Utama
     function enterMainMenu() {
-        unlockAudio(); // Suara diaktifkan sejak ketukan pertama di Cover
-        
+        unlockAudio(); 
         document.getElementById('splash-view').classList.add('hidden');
         document.getElementById('home-view').classList.remove('hidden');
     }
@@ -301,6 +319,12 @@
                 playPromise.catch(e => console.log("SFX blokir:", e));
             }
         }
+    }
+
+    function stopEndSounds() {
+        // Matikan suara menang/kalah jika pemain menekan tombol dengan cepat
+        sfxWin.pause(); sfxWin.currentTime = 0;
+        sfxLose.pause(); sfxLose.currentTime = 0;
     }
 
     // ===== FUNGSI GETAR (HAPTIC FEEDBACK) =====
@@ -354,10 +378,7 @@
 
     // --- NAVIGATION ---
     function startGame(mode) {
-        // Matikan Musik Latar agar anak bisa fokus
         bgMusic.pause(); 
-        
-        // Putar Suara Gong Penanda Masuk Arena
         playSFX(sfxStart); 
         
         currentMode = mode;
@@ -374,8 +395,9 @@
     }
 
     function goHome() {
-        // Nyalakan kembali musik latar saat keluar dari arena
-        bgMusic.play().catch(e => console.log(e)); 
+        stopEndSounds(); // Hentikan SFX menang/kalah
+        document.getElementById('end-screen').classList.add('hidden');
+        bgMusic.play().catch(e => console.log(e)); // Putar musik menu lagi
         
         document.getElementById('game-view').classList.add('hidden');
         document.getElementById('home-view').classList.remove('hidden');
@@ -442,7 +464,6 @@
 
     // --- BATTLE ANIMATION ---
     function triggerNinjaAttack() {
-      // Putar Suara Tebasan Pedang Ninja
       playSFX(sfxNinja); 
       
       const ninja = document.getElementById('ninja-char');
@@ -476,7 +497,6 @@
     }
 
     function triggerEnemyAttack() {
-      // Putar Suara Ledakan Musuh (8-bit)
       playSFX(sfxEnemy);
       
       const ninja = document.getElementById('ninja-char');
@@ -515,13 +535,19 @@
         disableAllCards();
         const conf = MODES[currentMode];
         const endScreen = document.getElementById('end-screen');
+        const endCard = document.getElementById('end-card');
         const endIcon = document.getElementById('end-icon');
         const endTitle = document.getElementById('end-title');
         const endSubtitle = document.getElementById('end-subtitle');
 
         if (condition === 'win') {
-            endScreen.style.background = 'linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(15, 23, 42, 0.9))'; endScreen.style.borderColor = 'rgba(16, 185, 129, 0.4)';
-            endIcon.textContent = '🏆'; endTitle.textContent = `${conf.enemyName} Tumbang!`; endTitle.style.color = '#10b981';
+            playSFX(sfxWin); // Putar Musik Menang
+            
+            endCard.style.background = 'linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(15, 23, 42, 0.98))'; 
+            endCard.style.borderColor = 'rgba(16, 185, 129, 0.4)';
+            endIcon.textContent = '🏆'; 
+            endTitle.textContent = `${conf.enemyName} Tumbang!`; 
+            endTitle.style.color = '#10b981';
             endSubtitle.textContent = 'Kamu adalah master perkalian!';
             
             let confettiCount = window.innerWidth < 600 ? 20 : 40;
@@ -530,8 +556,13 @@
             
             triggerVibration([100, 50, 100, 50, 150]); 
         } else {
-            endScreen.style.background = 'linear-gradient(135deg, rgba(244, 63, 94, 0.2), rgba(15, 23, 42, 0.9))'; endScreen.style.borderColor = 'rgba(244, 63, 94, 0.4)';
-            endIcon.textContent = '☠️'; endTitle.textContent = 'Ninja Gugur!'; endTitle.style.color = '#f43f5e';
+            playSFX(sfxLose); // Putar Musik Kalah
+            
+            endCard.style.background = 'linear-gradient(135deg, rgba(244, 63, 94, 0.2), rgba(15, 23, 42, 0.98))'; 
+            endCard.style.borderColor = 'rgba(244, 63, 94, 0.4)';
+            endIcon.textContent = '☠️'; 
+            endTitle.textContent = 'Ninja Gugur!'; 
+            endTitle.style.color = '#f43f5e';
             endSubtitle.textContent = 'Awas, perhatikan jawabanmu.';
             setStatus('❌ Game Over!');
         }
@@ -629,11 +660,19 @@
     }
 
     function resetGame() {
+      stopEndSounds(); // Hentikan suara menang/kalah jika dipencet cepat
+      
+      // Putar Suara Gong saat mengulang
+      playSFX(sfxStart);
+      
       const conf = MODES[currentMode];
       matches = {}; selectedQ = null; selectedA = null; isLocked = false; isGameOver = false;
       ninjaHP = MAX_NINJA_HP; enemyHP = MAX_ENEMY_HP;
-      document.getElementById('svg-lines').innerHTML = '';
+      
+      // Sembunyikan Pop-Up saat main lagi
       document.getElementById('end-screen').classList.add('hidden');
+      
+      document.getElementById('svg-lines').innerHTML = '';
       setStatus('Pilih soal di kiri');
       updateHPDisplays();
       
